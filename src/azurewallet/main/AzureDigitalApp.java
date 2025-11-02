@@ -136,7 +136,6 @@ public class AzureDigitalApp {
         userMenu(acc);
     }
 
-    // ----------------- DASHBOARD FEATURE -----------------
     private void showUserDashboard(UserAccount acc) {
         System.out.println("\n+==================================================+");
         System.out.println("|                  USER DASHBOARD                  |");

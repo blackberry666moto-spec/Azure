@@ -191,7 +191,6 @@ public class AdminControl {
         }
     }
 
-    // ================= NEW VOUCHER GENERATION PANEL =================
     private void generateVouchers(Scanner sc) {
         while (true) {
             System.out.println("\n+==========================================================+");
