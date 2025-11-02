@@ -3,8 +3,7 @@ package azurewallet.system;
 import azurewallet.models.UserAccount;
 import azurewallet.models.VoucherSystem;
 import azurewallet.main.BackgroundScheduler;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 import java.io.*;
 import java.time.LocalDateTime;
 
@@ -172,7 +171,8 @@ public class AdminControl {
                 try (PrintWriter pw = new PrintWriter(file)) {
                     pw.print("");
                 } catch (IOException e) {
-                    System.out.println("Error clearing " + file); }
+                    System.out.println("Error clearing " + file);
+                }
             }
             users.clear();
             fileManager.saveUsers(users);
@@ -186,7 +186,9 @@ public class AdminControl {
         try (BufferedReader br = new BufferedReader(new FileReader(ADMIN_LOG))) {
             String line;
             while ((line = br.readLine()) != null) System.out.println(line);
-        } catch (IOException e) { System.out.println("Error reading admin log."); }
+        } catch (IOException e) {
+            System.out.println("Error reading admin log.");
+        }
     }
 
     // ================= NEW VOUCHER GENERATION PANEL =================
@@ -196,8 +198,9 @@ public class AdminControl {
             System.out.println("|                   VOUCHER GENERATION MENU                |");
             System.out.println("+==========================================================+");
             System.out.println("| [1] Generate Monthly Vouchers                            |");
-            System.out.println("| [2] Generate Holiday Vouchers (if today is holiday)      |");
-            System.out.println("| [3] Back                                                 |");
+            System.out.println("| [2] Generate Holiday Vouchers                            |");
+            System.out.println("| [3] Generate One Voucher per User                        |");
+            System.out.println("| [4] Back                                                 |");
             System.out.println("+----------------------------------------------------------+");
             System.out.print("Choose: ");
             String ch = sc.nextLine().trim();
@@ -212,9 +215,56 @@ public class AdminControl {
                     VoucherSystem.generateHolidayVoucher(users);
                     logAdminAction("Generated holiday vouchers.");
                 }
-                case "3" -> { return; }
+                case "3" -> {
+                    generateSingleVoucherForAllUsers();
+                    logAdminAction("Generated one voucher per user.");
+                }
+                case "4" -> { return; }
                 default -> System.out.println("Invalid choice.");
             }
+        }
+    }
+
+    // ================= GENERATE SINGLE VOUCHER FOR EACH USER (NO DUPLICATES) =================
+    private void generateSingleVoucherForAllUsers() {
+        File voucherFile = new File(DATA_DIR + "vouchers.txt");
+        Set<String> existingUsersWithVouchers = new HashSet<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(voucherFile))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 2) {
+                    existingUsersWithVouchers.add(parts[0].trim().toLowerCase());
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading existing vouchers.");
+        }
+
+        try (PrintWriter pw = new PrintWriter(new FileWriter(voucherFile, true))) {
+            for (UserAccount user : users.values()) {
+                if (existingUsersWithVouchers.contains(user.getUsername().toLowerCase())) {
+                    System.out.println("User '" + user.getUsername() + "' already has a voucher. Skipped.");
+                    continue;
+                }
+
+                String rank = user.getRank();
+                double value = switch (rank) {
+                    case "Bronze" -> (Math.random() * 20) + 1;
+                    case "Silver" -> (Math.random() * 50) + 50;
+                    case "Gold" -> (Math.random() * 150) + 100;
+                    case "Platinum" -> (Math.random() * 200) + 250;
+                    default -> (Math.random() * 10) + 1;
+                };
+
+                String code = "VCHR-" + user.getUsername().toUpperCase() + "-" + (int) (Math.random() * 9000 + 1000);
+                pw.println(user.getUsername() + "," + code + "," + String.format("%.2f", value));
+                fileManager.logVoucher(user.getUsername(), code, value);
+                System.out.println("Voucher created for " + user.getUsername() + " (" + code + ") - PHP " + String.format("%.2f", value));
+            }
+        } catch (IOException e) {
+            System.out.println("Error generating vouchers.");
         }
     }
 }
