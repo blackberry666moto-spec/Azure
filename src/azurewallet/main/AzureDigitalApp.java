@@ -202,8 +202,8 @@ public class AzureDigitalApp {
         if (!confirmAction()) return;
 
         String prevRank = acc.getRank();
-        if (amount <= 0 || amount > acc.getDepositLimit()) {
-            System.out.println("Invalid or exceeds limit (" + df.format(acc.getDepositLimit()) + ")");
+        if (acc.getBalance() + amount > acc.getDepositLimit()) {
+            System.out.println("Deposit exceeds your rank limit of PHP " + df.format(acc.getDepositLimit()));
             return;
         }
 

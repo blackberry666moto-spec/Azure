@@ -150,7 +150,7 @@ public class UserAccount {
     public void viewVoucherNotification(FileManager fileManager) {
         int vouchers = fileManager.countUserVouchers(username);
         if (vouchers > 0) {
-            System.out.println(" You have " + vouchers + " available voucher(s).");
+            System.out.println("You have " + vouchers + " available voucher(s).");
         }
     }
 

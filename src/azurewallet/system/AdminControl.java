@@ -224,7 +224,6 @@ public class AdminControl {
         }
     }
 
-    // ================= GENERATE SINGLE VOUCHER FOR EACH USER (NO DUPLICATES) =================
     private void generateSingleVoucherForAllUsers() {
         File voucherFile = new File(DATA_DIR + "vouchers.txt");
         Set<String> existingUsersWithVouchers = new HashSet<>();
